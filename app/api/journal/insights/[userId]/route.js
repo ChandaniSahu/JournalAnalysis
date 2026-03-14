@@ -2,9 +2,10 @@ import { connectDB } from "@/lib/db";
 import Journal from "@/models/Journal";
 
 export async function GET(req, { params }) {
+  const {userId} = await params 
   await connectDB();
 
-  const entries = await Journal.find({ userId: params.userId });
+  const entries = await Journal.find({ userId: userId });
 
   const totalEntries = entries.length;
 

@@ -30,11 +30,11 @@ export default function Home() {
     setEntries(data);
   }
 
-  // async function fetchInsights(id) {
-  //   const res = await fetch(`/api/journal/insights/${id}`);
-  //   const data = await res.json();
-  //   setInsights(data);
-  // }
+  async function fetchInsights(id) {
+    const res = await fetch(`/api/journal/insights/${id}`);
+    const data = await res.json();
+    setInsights(data);
+  }
 
   async function submitEntry() {
     await fetch("/api/journal", {
@@ -132,8 +132,8 @@ setAnalysis({
 
       <hr />
 
-      {/*<h2>Emotion Insights</h2>
-
+    <h2>Emotion Insights</h2>
+     <button onClick={() => fetchInsights(userId)}>clikc</button>
       {insights && (
         <div>
           <p>Total Entries: {insights.totalEntries}</p>
@@ -143,7 +143,7 @@ setAnalysis({
             Keywords: {insights.recentKeywords?.join(", ")}
           </p>
         </div>
-      )} */}
+      )} 
     </div>
   );
 }

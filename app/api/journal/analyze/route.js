@@ -10,14 +10,21 @@ export async function POST(req) {
       model: "gemini-2.5-flash"
     });
 
-    const prompt = `
+const prompt = `
 Analyze the following journal entry and return ONLY valid JSON in this format:
 
 {
   "emotion": "",
-  "keywords": [],
+  "keywords": ["keyword1", "keyword2", "keyword3"],
   "summary": ""
 }
+
+Rules:
+- "keywords" must be an array of separate words or short phrases.
+- Each keyword must be its own string element in the array.
+- Never combine multiple keywords into one element.
+- Example: ["stress", "work", "deadline"] 
+  NOT ["stress", "work deadline"]
 
 Journal text:
 ${text}
