@@ -2,14 +2,36 @@
 
 import { useEffect, useState } from "react";
 
+interface JournalEntry {
+  _id: string;
+  text: string;
+  ambience: string;
+  emotion?: string;
+  keywords?: string[];
+  summary?: string;
+}
+
+interface AnalysisResult {
+  emotion: string;
+  keywords: string[];
+  summary: string;
+}
+
 export default function Home() {
   const [userId, setUserId] = useState("");
   const [text, setText] = useState("");
   const [ambience, setAmbience] = useState("forest");
 
-  const [entries, setEntries] = useState([]);
-  const [analysis, setAnalysis] = useState({emotion:"",keywords:[],summary:""});
-  const [insights, setInsights] = useState(null);
+const [entries, setEntries] = useState<JournalEntry[]>([]);
+const [analysis, setAnalysis] = useState<AnalysisResult>({emotion:"",keywords:[],summary:""});
+  interface InsightsData {
+  totalEntries: number;
+  topEmotion: string;
+  mostUsedAmbience: string;
+  recentKeywords?: string[];
+}
+
+const [insights, setInsights] = useState<InsightsData | null>(null);
 
   useEffect(() => {
     let id = localStorage.getItem("userId");
@@ -20,17 +42,21 @@ export default function Home() {
     }
 
     setUserId(id);
-    fetchEntries(id);
-    // fetchInsights(id);
+    fetchEntries(id).then(() => {
+      fetchLatest();
+    });
+    fetchInsights(id);
+    
   }, []);
 
-  async function fetchEntries(id) {
+  async function fetchEntries(id: string) {
     const res = await fetch(`/api/journal/${id}`);
     const data = await res.json();
     setEntries(data);
+    return data;
   }
 
-  async function fetchInsights(id) {
+  async function fetchInsights(id: string) {
     const res = await fetch(`/api/journal/insights/${id}`);
     const data = await res.json();
     setInsights(data);
@@ -48,8 +74,21 @@ export default function Home() {
 
     setText("");
     fetchEntries(userId);
-    // fetchInsights(userId);
+    fetchInsights(userId);
+    analyzeLatest()
   }
+
+ async function fetchLatest(){
+  if (!entries.length) return;
+
+  const latest = entries[0];
+
+  setAnalysis({
+    emotion: latest.emotion,
+    keywords: latest.keywords,
+    summary: latest.summary
+  });
+ }
 
   async function analyzeLatest() {
     if (!entries.length) return;
@@ -63,22 +102,13 @@ export default function Home() {
       })
     });
 
-const data = await res.json();
+    const data = await res.json();
 
-// remove markdown wrapper
-const cleaned = data.result
-  .replace(/```json/g, "")
-  .replace(/```/g, "")
-  .trim();
-
-// convert to object
-const parsed = JSON.parse(cleaned);
-
-setAnalysis({
-  emotion: parsed.emotion,
-  keywords: parsed.keywords,
-  summary: parsed.summary
-});
+    setAnalysis({
+      emotion: data.emotion,
+      keywords: data.keywords,
+      summary: data.summary
+    });
   }
 
   return (
@@ -118,17 +148,26 @@ setAnalysis({
 
        <h2>Analyze Latest Entry</h2>
 
-      <button onClick={analyzeLatest}>
-        Click Analyze Latest Entry
-      </button>
+      {entries.length === 0 ? (
+        <div>
+          <p>No journal entries for analysis</p>
+          <button onClick={analyzeLatest} disabled>
+            Analyze Latest Entry
+          </button>
+        </div>
+      ) : (
+        <div>
+          <button onClick={analyzeLatest}>
+            Analyze Latest Entry
+          </button>
 
-     {analysis && <div>
-  <p><strong>Emotion:</strong> {analysis.emotion}</p>
-
-  <p><strong>Keywords:</strong> {analysis.keywords.join(", ")}</p>
-
-  <p><strong>Summary:</strong> {analysis.summary}</p>
-</div>}
+         {analysis && <div>
+            <p><strong>Emotion:</strong> {analysis.emotion}</p>
+            <p><strong>Keywords:</strong> {analysis.keywords.join(", ")}</p>
+            <p><strong>Summary:</strong> {analysis.summary}</p>
+          </div>}
+        </div>
+      )}
 
       <hr />
 
