@@ -42,20 +42,26 @@ const [insights, setInsights] = useState<InsightsData | null>(null);
     }
 
     setUserId(id);
-    fetchEntries(id).then(() => {
-      fetchLatest();
-    });
+    fetchEntries(id);
     fetchInsights(id);
     
   }, []);
-
   async function fetchEntries(id: string) {
     const res = await fetch(`/api/journal/${id}`);
     const data = await res.json();
     setEntries(data);
+
+    if (data.length) {
+      const latest = data[0];
+      setAnalysis({
+        emotion: latest.emotion,
+        keywords: latest.keywords,
+        summary: latest.summary
+      });
+    }
+
     return data;
   }
-
   async function fetchInsights(id: string) {
     const res = await fetch(`/api/journal/insights/${id}`);
     const data = await res.json();
@@ -78,19 +84,7 @@ const [insights, setInsights] = useState<InsightsData | null>(null);
     analyzeLatest()
   }
 
- async function fetchLatest(){
-  if (!entries.length) return;
-
-  const latest = entries[0];
-
-  setAnalysis({
-    emotion: latest.emotion,
-    keywords: latest.keywords,
-    summary: latest.summary
-  });
- }
-
-  async function analyzeLatest() {
+   async function analyzeLatest() {
     if (!entries.length) return;
 
     const latest = entries[0];
@@ -110,7 +104,6 @@ const [insights, setInsights] = useState<InsightsData | null>(null);
       summary: data.summary
     });
   }
-
   return (
     <div style={{ padding: 40 }}>
 
