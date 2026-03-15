@@ -28,7 +28,8 @@ Checkout here : [https://chandani-journal-analysis.netlify.app/](https://chandan
 
 1. Clone the repository: 
 ```base
-git clone https://github.com/ChandaniSahu/JournalAnalysis.git\```
+git clone https://github.com/ChandaniSahu/JournalAnalysis.git\
+```
 2. Install dependencies: 
 ```base
 npm install
