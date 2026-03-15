@@ -8,6 +8,6 @@ export async function GET(req, { params }) {
   const entries = await Journal.find({ userId: userId }).sort({
     createdAt: -1
   });
-
+  console.log('entries',entries)
   return Response.json(entries);
 }
